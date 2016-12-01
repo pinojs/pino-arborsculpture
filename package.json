@@ -1,0 +1,37 @@
+{
+  "name": "pino-arborsculpture",
+  "version": "1.0.0",
+  "description": "Allows changing Pino log levels at runtime via a file monitor",
+  "main": "sculpt.js",
+  "scripts": {
+    "test": "standard && tap --no-cov test/*.test.js"
+  },
+  "precommit": [
+    "test"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pinojs/pino-arborsculpture.git"
+  },
+  "keywords": [
+    "pino",
+    "logging"
+  ],
+  "author": "James Sumners <james.sumners@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pinojs/pino-arborsculpture/issues"
+  },
+  "homepage": "https://github.com/pinojs/pino-arborsculpture#readme",
+  "dependencies": {
+    "fast-json-parse": "^1.0.2"
+  },
+  "devDependencies": {
+    "flush-write-stream": "^1.0.2",
+    "pino": "^3.0.4",
+    "pre-commit": "^1.1.3",
+    "standard": "^8.6.0",
+    "tap": "^8.0.1",
+    "uuid": "^3.0.1"
+  }
+}
