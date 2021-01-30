@@ -14,12 +14,8 @@ const defaultOptions = {
 
 function changeLevels (loggers, levels) {
   const len = (loggers.length === levels.length) ? loggers.length : levels.length
-  for (var i = 0; i < len; i += 1) {
-    try {
-      loggers[i].level = levels[i]
-    } catch (e) {
-      throw e
-    }
+  for (let i = 0; i < len; i += 1) {
+    loggers[i].level = levels[i]
   }
 }
 
@@ -28,7 +24,7 @@ function Arborsculpt (options) {
   const opts = Object.assign({}, defaultOptions, options)
   const resolvedFP = path.resolve(opts.path)
   const emitter = this
-  var mtime
+  let mtime
 
   function readFile () {
     fs.open(resolvedFP, 'r', function (err, fd) {
@@ -38,7 +34,7 @@ function Arborsculpt (options) {
         const result = new Parse(file)
         if (result.err) return emitter.emit(err)
 
-        var levels
+        let levels
         if (result.value.level) {
           levels = new Array(opts.loggers.length)
           levels.fill(result.value.level)

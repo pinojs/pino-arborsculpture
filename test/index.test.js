@@ -6,7 +6,7 @@ const path = require('path')
 const test = require('tap').test
 const pino = require('pino')
 const arbor = require('../')
-const uuid = require('uuid')
+const { v4: uuid } = require('uuid')
 const writeStream = require('flush-write-stream')
 const proxyquire = require('proxyquire')
 
@@ -18,14 +18,14 @@ test('uses the default temp path for level configuration if not specified', func
       selectedPath = path
     }
   }
-  const proxiedArbor = proxyquire('../', { 'path': pathStub })
+  const proxiedArbor = proxyquire('../', { path: pathStub })
   proxiedArbor()
   t.is(selectedPath, path.join(os.tmpdir(), 'aborsculpt.json'))
 })
 
 test('applies a single level to a single logger', function (t) {
   t.plan(1)
-  const fp = '/tmp/arbor.' + uuid.v4()
+  const fp = '/tmp/arbor.' + uuid()
   const dest = writeStream(function (chunk, enc, cb) {
     const line = JSON.parse(chunk)
     t.is(line.level, 20)
@@ -39,7 +39,7 @@ test('applies a single level to a single logger', function (t) {
     interval: 100
   })
 
-  fs.writeFileSync(fp, JSON.stringify({level: 'debug'}))
+  fs.writeFileSync(fp, JSON.stringify({ level: 'debug' }))
   setTimeout(function () {
     log.debug('foo')
     fs.unlink(fp, () => {})
@@ -48,7 +48,7 @@ test('applies a single level to a single logger', function (t) {
 
 test('applies a single level to multiple loggers', function (t) {
   t.plan(2)
-  const fp = '/tmp/arbor.' + uuid.v4()
+  const fp = '/tmp/arbor.' + uuid()
   const dest = writeStream(function (chunk, enc, cb) {
     const line = JSON.parse(chunk)
     t.is(line.level, 20)
@@ -56,14 +56,14 @@ test('applies a single level to multiple loggers', function (t) {
   })
 
   const parent = pino(dest)
-  const child = parent.child({foo: 'bar'})
+  const child = parent.child({ foo: 'bar' })
   arbor({
     path: fp,
     loggers: [parent, child],
     interval: 100
   })
 
-  fs.writeFileSync(fp, JSON.stringify({level: 'debug'}))
+  fs.writeFileSync(fp, JSON.stringify({ level: 'debug' }))
   setTimeout(function () {
     parent.debug('parent')
     child.debug('child')
@@ -73,7 +73,7 @@ test('applies a single level to multiple loggers', function (t) {
 
 test('applies multiple levels to corresponding levels', function (t) {
   t.plan(2)
-  const fp = '/tmp/arbor.' + uuid.v4()
+  const fp = '/tmp/arbor.' + uuid()
   const dest = writeStream(function (chunk, enc, cb) {
     const line = JSON.parse(chunk)
     if (line.foo === undefined) {
@@ -85,14 +85,14 @@ test('applies multiple levels to corresponding levels', function (t) {
   })
 
   const parent = pino(dest)
-  const child = parent.child({foo: 'bar'})
+  const child = parent.child({ foo: 'bar' })
   arbor({
     path: fp,
     loggers: [parent, child],
     interval: 100
   })
 
-  fs.writeFileSync(fp, JSON.stringify({levels: ['debug', 'trace']}))
+  fs.writeFileSync(fp, JSON.stringify({ levels: ['debug', 'trace'] }))
   setTimeout(function () {
     parent.debug('foo')
     child.trace('bar')
@@ -104,7 +104,7 @@ test('fails silently if file does not exist', function (t) {
   t.plan(1)
   const log = pino()
   arbor({
-    path: '/tmp/arbor.' + uuid.v4(),
+    path: '/tmp/arbor.' + uuid(),
     loggers: [log],
     interval: 100
   })
@@ -115,16 +115,16 @@ test('fails silently if file does not exist', function (t) {
 
 test('modifies only as many loggers as there are levels', function (t) {
   t.plan(2)
-  const fp = '/tmp/arbor.' + uuid.v4()
+  const fp = '/tmp/arbor.' + uuid()
   const parent = pino()
-  const child = parent.child({foo: 'bar'})
+  const child = parent.child({ foo: 'bar' })
   arbor({
     path: fp,
     loggers: [parent, child],
     interval: 100
   })
 
-  fs.writeFileSync(fp, JSON.stringify({levels: ['debug']}))
+  fs.writeFileSync(fp, JSON.stringify({ levels: ['debug'] }))
   setTimeout(function () {
     t.is(parent.level, 'debug')
     t.is(child.level, 'info')
