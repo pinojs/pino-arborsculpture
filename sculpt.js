@@ -7,7 +7,7 @@ const path = require('path')
 const Parse = require('fast-json-parse')
 
 const defaultOptions = {
-  path: os.tmpdir() + 'aborsculpt.json',
+  path: path.join(os.tmpdir(), 'aborsculpt.json'),
   interval: 60000,
   loggers: []
 }

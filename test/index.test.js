@@ -1,11 +1,27 @@
 'use strict'
 
 const fs = require('fs')
+const os = require('os')
+const path = require('path')
 const test = require('tap').test
 const pino = require('pino')
 const arbor = require('../')
 const uuid = require('uuid')
 const writeStream = require('flush-write-stream')
+const proxyquire = require('proxyquire')
+
+test('uses the default temp path for level configuration if not specified', function (t) {
+  t.plan(1)
+  let selectedPath
+  const pathStub = {
+    resolve (path) {
+      selectedPath = path
+    }
+  }
+  const proxiedArbor = proxyquire('../', { 'path': pathStub })
+  proxiedArbor()
+  t.is(selectedPath, path.join(os.tmpdir(), 'aborsculpt.json'))
+})
 
 test('applies a single level to a single logger', function (t) {
   t.plan(1)
@@ -26,7 +42,7 @@ test('applies a single level to a single logger', function (t) {
   fs.writeFileSync(fp, JSON.stringify({level: 'debug'}))
   setTimeout(function () {
     log.debug('foo')
-    fs.unlink(fp)
+    fs.unlink(fp, () => {})
   }, 110)
 })
 
@@ -51,7 +67,7 @@ test('applies a single level to multiple loggers', function (t) {
   setTimeout(function () {
     parent.debug('parent')
     child.debug('child')
-    fs.unlink(fp)
+    fs.unlink(fp, () => {})
   }, 110)
 })
 
@@ -80,7 +96,7 @@ test('applies multiple levels to corresponding levels', function (t) {
   setTimeout(function () {
     parent.debug('foo')
     child.trace('bar')
-    fs.unlink(fp)
+    fs.unlink(fp, () => {})
   }, 110)
 })
 
@@ -112,6 +128,6 @@ test('modifies only as many loggers as there are levels', function (t) {
   setTimeout(function () {
     t.is(parent.level, 'debug')
     t.is(child.level, 'info')
-    fs.unlink(fp)
+    fs.unlink(fp, () => {})
   }, 110)
 })
