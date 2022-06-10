@@ -20,7 +20,7 @@ test('uses the default temp path for level configuration if not specified', func
   }
   const proxiedArbor = proxyquire('../', { path: pathStub })
   proxiedArbor()
-  t.is(selectedPath, path.join(os.tmpdir(), 'aborsculpt.json'))
+  t.equal(selectedPath, path.join(os.tmpdir(), 'aborsculpt.json'))
 })
 
 test('applies a single level to a single logger', function (t) {
@@ -28,7 +28,7 @@ test('applies a single level to a single logger', function (t) {
   const fp = '/tmp/arbor.' + uuid()
   const dest = writeStream(function (chunk, enc, cb) {
     const line = JSON.parse(chunk)
-    t.is(line.level, 20)
+    t.equal(line.level, 20)
     cb()
   })
 
@@ -51,7 +51,7 @@ test('applies a single level to multiple loggers', function (t) {
   const fp = '/tmp/arbor.' + uuid()
   const dest = writeStream(function (chunk, enc, cb) {
     const line = JSON.parse(chunk)
-    t.is(line.level, 20)
+    t.equal(line.level, 20)
     cb()
   })
 
@@ -77,9 +77,9 @@ test('applies multiple levels to corresponding levels', function (t) {
   const dest = writeStream(function (chunk, enc, cb) {
     const line = JSON.parse(chunk)
     if (line.foo === undefined) {
-      t.is(line.level, 20)
+      t.equal(line.level, 20)
     } else {
-      t.is(line.level, 10)
+      t.equal(line.level, 10)
     }
     cb()
   })
@@ -109,7 +109,7 @@ test('fails silently if file does not exist', function (t) {
     interval: 100
   })
   setTimeout(function () {
-    t.is(log.level, 'info')
+    t.equal(log.level, 'info')
   }, 110)
 })
 
@@ -126,8 +126,8 @@ test('modifies only as many loggers as there are levels', function (t) {
 
   fs.writeFileSync(fp, JSON.stringify({ levels: ['debug'] }))
   setTimeout(function () {
-    t.is(parent.level, 'debug')
-    t.is(child.level, 'info')
+    t.equal(parent.level, 'debug')
+    t.equal(child.level, 'info')
     fs.unlink(fp, () => {})
   }, 110)
 })
