@@ -1,6 +1,6 @@
 {
   "name": "pino-arborsculpture",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Allows changing Pino log levels at runtime via a file monitor",
   "main": "sculpt.js",
   "scripts": {
