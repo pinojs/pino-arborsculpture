@@ -21,7 +21,7 @@ const log = pino() // info level by default
 const arbor = new Arborsculpt({
   path: '/tmp/adjustments.json',
   loggers: [log],
-  interval: 60000 // the default
+  interval: 60_000 // the default
 })
 
 arbor.on('error', function (err) {
@@ -30,7 +30,7 @@ arbor.on('error', function (err) {
 ```
 
 At some point you decide `log` should be set to the `debug` level because
-production is broken and you have to figure out why without taking it offline,
+production is broken, and you have to figure out why without taking it offline,
 so you create the `/tmp/adjustments.json` file:
 
 ```json
@@ -49,7 +49,7 @@ Within one minute of creating the file, your process will start outputting
   levels in your process. Default: `os.tmpdir() + 'aborsculpt.json'`
 + `loggers` [required]: an array of Pino instances to adjust. Default: `[]`
 + `interval` [optional]: the number of milliseconds between scans of the
-  specified file. Default: `60000`
+  specified file. Default: `60_000`
 
 ## Level Change File Format
 
@@ -75,9 +75,10 @@ In the first case, the single level will be applied to *all* loggers supplied
 at construction. In the second case, each level will be applied to the
 corresponding logger in the loggers array. Note: if you supplied 5 loggers
 at construction, but only 3 in the file, then only the first 3 loggers will
-have their levels changed.
+have their levels changed. But be aware, Pino will change the level of child
+loggers when the parent logger's level is changed.
 
-All level names **must** be valid level names as registerd with the target Pino
+All level names **must** be valid level names as registered with the target Pino
 instances.
 
 ## License

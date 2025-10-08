@@ -1,34 +1,36 @@
 'use strict'
 
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-const test = require('tap').test
-const pino = require('pino')
-const arbor = require('../')
-const { v4: uuid } = require('uuid')
+const test = require('node:test')
+const assert = require('node:assert')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
+const { randomUUID: uuid } = require('node:crypto')
 const writeStream = require('flush-write-stream')
 const proxyquire = require('proxyquire')
+const pino = require('pino')
+const tspl = require('@matteo.collina/tspl')
 
-test('uses the default temp path for level configuration if not specified', function (t) {
-  t.plan(1)
+const arbor = require('../')
+
+test('uses the default temp path for level configuration if not specified', async () => {
   let selectedPath
   const pathStub = {
     resolve (path) {
       selectedPath = path
     }
   }
-  const proxiedArbor = proxyquire('../', { path: pathStub })
+  const proxiedArbor = proxyquire('../', { 'node:path': pathStub })
   proxiedArbor()
-  t.equal(selectedPath, path.join(os.tmpdir(), 'aborsculpt.json'))
+  assert.equal(selectedPath, path.join(os.tmpdir(), 'aborsculpt.json'))
 })
 
-test('applies a single level to a single logger', function (t) {
-  t.plan(1)
+test('applies a single level to a single logger', async (t) => {
+  const plan = tspl(t, { plan: 1 })
   const fp = '/tmp/arbor.' + uuid()
   const dest = writeStream(function (chunk, enc, cb) {
     const line = JSON.parse(chunk)
-    t.equal(line.level, 20)
+    plan.equal(line.level, 20)
     cb()
   })
 
@@ -44,14 +46,16 @@ test('applies a single level to a single logger', function (t) {
     log.debug('foo')
     fs.unlink(fp, () => {})
   }, 110)
+
+  await plan
 })
 
-test('applies a single level to multiple loggers', function (t) {
-  t.plan(2)
+test('applies a single level to multiple loggers', async (t) => {
+  const plan = tspl(t, { plan: 2 })
   const fp = '/tmp/arbor.' + uuid()
   const dest = writeStream(function (chunk, enc, cb) {
     const line = JSON.parse(chunk)
-    t.equal(line.level, 20)
+    plan.equal(line.level, 20)
     cb()
   })
 
@@ -69,17 +73,19 @@ test('applies a single level to multiple loggers', function (t) {
     child.debug('child')
     fs.unlink(fp, () => {})
   }, 110)
+
+  await plan
 })
 
-test('applies multiple levels to corresponding levels', function (t) {
-  t.plan(2)
+test('applies multiple levels to corresponding levels', async (t) => {
+  const plan = tspl(t, { plan: 2 })
   const fp = '/tmp/arbor.' + uuid()
   const dest = writeStream(function (chunk, enc, cb) {
     const line = JSON.parse(chunk)
     if (line.foo === undefined) {
-      t.equal(line.level, 20)
+      plan.equal(line.level, 20)
     } else {
-      t.equal(line.level, 10)
+      plan.equal(line.level, 10)
     }
     cb()
   })
@@ -98,10 +104,12 @@ test('applies multiple levels to corresponding levels', function (t) {
     child.trace('bar')
     fs.unlink(fp, () => {})
   }, 110)
+
+  await plan
 })
 
-test('fails silently if file does not exist', function (t) {
-  t.plan(1)
+test('fails silently if file does not exist', async (t) => {
+  const plan = tspl(t, { plan: 1 })
   const log = pino()
   arbor({
     path: '/tmp/arbor.' + uuid(),
@@ -109,12 +117,14 @@ test('fails silently if file does not exist', function (t) {
     interval: 100
   })
   setTimeout(function () {
-    t.equal(log.level, 'info')
+    plan.equal(log.level, 'info')
   }, 110)
+
+  await plan
 })
 
-test('modifies only as many loggers as there are levels', function (t) {
-  t.plan(2)
+test('changes child levels because that is what pino does', async (t) => {
+  const plan = tspl(t, { plan: 2 })
   const fp = '/tmp/arbor.' + uuid()
   const parent = pino()
   const child = parent.child({ foo: 'bar' })
@@ -126,8 +136,10 @@ test('modifies only as many loggers as there are levels', function (t) {
 
   fs.writeFileSync(fp, JSON.stringify({ levels: ['debug'] }))
   setTimeout(function () {
-    t.equal(parent.level, 'debug')
-    t.equal(child.level, 'info')
+    plan.equal(parent.level, 'debug')
+    plan.equal(child.level, 'debug')
     fs.unlink(fp, () => {})
   }, 110)
+
+  await plan
 })

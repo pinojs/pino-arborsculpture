@@ -1,14 +1,14 @@
 'use strict'
 
-const events = require('events')
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
+const events = require('node:events')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
 const Parse = require('fast-json-parse')
 
 const defaultOptions = {
   path: path.join(os.tmpdir(), 'aborsculpt.json'),
-  interval: 60000,
+  interval: 60_000,
   loggers: []
 }
 
